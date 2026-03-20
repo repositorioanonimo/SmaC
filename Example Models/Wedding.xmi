@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="ASCII"?>
+<smaC:File xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:smaC="http://www.xtext.org/SmaC">
+  <version symbol=">=" numberVersion="0.8.0"/>
+  <contracts name="MarriageContract">
+    <localProperties xsi:type="smaC:PropertyUser" type="User" name="gubernamental_account"/>
+    <localProperties xsi:type="smaC:PropertyUInteger" type="uint" visibility="private" name="counterRegisterUsersMarriage" inicialization="0"/>
+    <localProperties xsi:type="smaC:PropertyUInteger" type="uint" visibility="private" name="counterWitnessUsersMarriage" inicialization="0"/>
+    <localProperties xsi:type="smaC:PropertyUInteger" type="uint256" visibility="private" name="tax"/>
+    <localProperties xsi:type="smaC:PropertyAddress" type="address " visibility="private" name="address1MarriageUser"/>
+    <localProperties xsi:type="smaC:PropertyAddress" type="address " visibility="private" name="address2MarriageUser"/>
+    <localProperties xsi:type="smaC:PropertyAddress" type="address " visibility="private" name="address1WitnessUser"/>
+    <localProperties xsi:type="smaC:PropertyAddress" type="address " visibility="private" name="address2WitnessUser"/>
+    <localMappingProperties xsi:type="smaC:MappingDeclaration" type="mapping" nameMapping="registerUsersMarriage" key="address " value="User"/>
+    <localMappingProperties xsi:type="smaC:MappingDeclaration" type="mapping" nameMapping="registerWitnessUsersMarriage" key="address " value="User"/>
+    <structsUser name="User" nameAttributeAddress="idAddress" nameAttributeUser="nameUser" nameAttributeSurnameUser="surnameUser" emailAttributeUser="email">
+      <properties xsi:type="smaC:PropertyBoolean" type="bool" name="accept"/>
+    </structsUser>
+    <constructors type="public">
+      <inputParams type="uint256" valueInput="_tax"/>
+      <attributesInitialization>gubernamental_account.idAddress = msg.sender</attributesInitialization>
+      <attributesInitialization>tax = _tax</attributesInitialization>
+    </constructors>
+    <modifiers name="onlyGubernamentalAccount">
+      <conditionRestricion xsi:type="smaC:Restriction" expr1="msg.sender" operator="==" expr2="gubernamental_account.idAddress" message="&quot;Only gubernamental user can call this.&quot;"/>
+    </modifiers>
+    <modifiers name="onlyMarriageAccount">
+      <conditionRestricion xsi:type="smaC:Restriction" expr1="msg.sender" operator="==" expr2="registerUsersMarriage[msg.sender].idAddress" message="&quot;Only marriage user can call this.&quot;"/>
+    </modifiers>
+    <modifiers name="onlyWitnessAccount">
+      <conditionRestricion xsi:type="smaC:Restriction" expr1="msg.sender" operator="==" expr2="registerWitnessUsersMarriage[msg.sender].idAddress" message="&quot;Only witness user can call this.&quot;"/>
+    </modifiers>
+    <modifiers name="controlUsersMarriage">
+      <conditionRestricion xsi:type="smaC:Restriction" expr1="counterRegisterUsersMarriage" operator="&lt;" expr2="2" message="&quot;Only two people can get married.&quot;"/>
+    </modifiers>
+    <modifiers name="controlWitnessUsersMarriage">
+      <conditionRestricion xsi:type="smaC:Restriction" expr1="counterWitnessUsersMarriage" operator="&lt;" expr2="2" message="&quot;Only two witnesses can validate the marriage.&quot;"/>
+    </modifiers>
+    <events name="RegisterSystem">
+      <inputParams type="string" valueInput="message"/>
+    </events>
+    <events name="SendConfirmation">
+      <inputParams type="string" valueInput="message"/>
+    </events>
+    <events name="SendRejection">
+      <inputParams type="string" valueInput="message"/>
+    </events>
+    <events name="AcceptProcess">
+      <inputParams type="string" valueInput="message"/>
+    </events>
+    <clauses name="setModifyTaxMarriage" visibilityAccess="private" personalizedModifier="//@contracts.0/@modifiers.0">
+      <inputParams type="uint256" valueInput="_tax"/>
+      <expressions>tax = _tax;</expressions>
+    </clauses>
+    <clauses name="insertDataUser" personalizedModifier="//@contracts.0/@modifiers.0 //@contracts.0/@modifiers.3" event="//@contracts.0/@events.0">
+      <inputParams type="address " valueInput="_address"/>
+      <inputParams type="string" valueInput="_nameUser"/>
+      <inputParams type="string" valueInput="_surnameUser"/>
+      <inputParams type="string" valueInput="_email"/>
+      <restriction xsi:type="smaC:Restriction" expr1="_address" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <properties xsi:type="smaC:PropertyUser" type="User" name="user" inicialization="User(_address,_nameUser,_surnameUser,_email,false)"/>
+      <expressions>registerUsersMarriage[user.idAddress] = user;</expressions>
+      <expressions>assignAddressMarriageUsers(user.idAddress);</expressions>
+      <expressions>counterRegisterUsersMarriage++;</expressions>
+      <inputParamsEvent valueInput="&quot;The user has been registered in the system&quot;"/>
+    </clauses>
+    <clauses name="insertDataUser" personalizedModifier="//@contracts.0/@modifiers.3" event="//@contracts.0/@events.0">
+      <inputParams type="string" valueInput="_nameUser"/>
+      <inputParams type="string" valueInput="_surnameUser"/>
+      <inputParams type="string" valueInput="_email"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <properties xsi:type="smaC:PropertyUser" type="User" name="user" inicialization="User(msg.sender,_nameUser,_surnameUser,_email,false)"/>
+      <expressions>registerUsersMarriage[user.idAddress] = user;</expressions>
+      <expressions>assignAddressMarriageUsers(user.idAddress);</expressions>
+      <expressions>counterRegisterUsersMarriage++;</expressions>
+      <inputParamsEvent valueInput="&quot;The user has been registered in the system&quot;"/>
+    </clauses>
+    <clauses name="assignAddressMarriageUsers" visibilityAccess="private">
+      <inputParams type="address " valueInput="_address"/>
+      <conditions condition="counterRegisterUsersMarriage &lt; 1">
+        <expressions>address1MarriageUser = _address;</expressions>
+        <expressionsElse>address2MarriageUser = _address;</expressionsElse>
+      </conditions>
+    </clauses>
+    <clauses name="insertDataWitnessUser" personalizedModifier="//@contracts.0/@modifiers.0 //@contracts.0/@modifiers.3" event="//@contracts.0/@events.0">
+      <inputParams type="address " valueInput="_address"/>
+      <inputParams type="string" valueInput="_nameUser"/>
+      <inputParams type="string" valueInput="_surnameUser"/>
+      <inputParams type="string" valueInput="_email"/>
+      <restriction xsi:type="smaC:Restriction" expr1="_address" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <properties xsi:type="smaC:PropertyUser" type="User" name="user" inicialization="User(_address,_nameUser,_surnameUser,_email,false)"/>
+      <expressions>registerWitnessUsersMarriage[user.idAddress] = user;</expressions>
+      <expressions>assignAddressWitnessUsers(user.idAddress);</expressions>
+      <expressions>counterWitnessUsersMarriage++;</expressions>
+      <inputParamsEvent valueInput="&quot;The user has been registered in the system&quot;"/>
+    </clauses>
+    <clauses name="insertDataWitnessUser" event="//@contracts.0/@events.0">
+      <inputParams type="string" valueInput="_nameUser"/>
+      <inputParams type="string" valueInput="_surnameUser"/>
+      <inputParams type="string" valueInput="_email"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <properties xsi:type="smaC:PropertyUser" type="User" name="user" inicialization="User(msg.sender,_nameUser,_surnameUser,_email,false)"/>
+      <expressions>registerWitnessUsersMarriage[user.idAddress] = user;</expressions>
+      <expressions>assignAddressWitnessUsers(user.idAddress);</expressions>
+      <expressions>counterWitnessUsersMarriage++;</expressions>
+      <inputParamsEvent valueInput="&quot;The user has been registered in the system&quot;"/>
+    </clauses>
+    <clauses name="assignAddressWitnessUsers" visibilityAccess="private">
+      <inputParams type="address " valueInput="_address"/>
+      <conditions condition="counterWitnessUsersMarriage &lt; 1">
+        <expressions>address1WitnessUser = _address;</expressions>
+        <expressionsElse>address2WitnessUser = _address;</expressionsElse>
+      </conditions>
+    </clauses>
+    <clauses name="acceptProcess" personalizedModifier="//@contracts.0/@modifiers.1" predefinedModifier="payable">
+      <inputParams type="bool" valueInput="accept"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender.balance" operator=">=" expr2="tax" message="&quot;Account can't paid the marriage tax&quot;"/>
+      <conditions condition="user.accept == false &amp;&amp; accept == true" event="//@contracts.0/@events.1">
+        <expressions>user.accept = true;</expressions>
+        <expressions>payable(user.idAddress).transfer</expressions>
+        <expressions>(tax);</expressions>
+        <inputParamsEvent valueInput="&quot;Accept&quot;"/>
+      </conditions>
+      <properties xsi:type="smaC:PropertyUser" type="User" name="user" inicialization="registerUsersMarriage[msg.sender]"/>
+    </clauses>
+    <clauses name="changeOpinionProcessMarriageUser" personalizedModifier="//@contracts.0/@modifiers.1" predefinedModifier="payable">
+      <inputParams type="bool" valueInput="opinion"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender.balance" operator=">=" expr2="tax" message="&quot;Account can't paid the marriage tax&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="user.accept" operator="!=" expr2="opinion" message="&quot;User doesn't change the original opinion&quot;"/>
+      <conditions condition="user.accept == false &amp;&amp; opinion == true" event="//@contracts.0/@events.1">
+        <expressions>user.accept = true;</expressions>
+        <expressions>payable(user.idAddress).transfer</expressions>
+        <expressions>(tax);</expressions>
+        <inputParamsEvent valueInput="&quot;User accepts the process&quot;"/>
+      </conditions>
+      <conditions condition="user.accept == true &amp;&amp; opinion == false" event="//@contracts.0/@events.2">
+        <expressions>user.accept = false;</expressions>
+        <expressions>payable(user.idAddress).transfer</expressions>
+        <expressions>(tax);</expressions>
+        <inputParamsEvent valueInput="&quot;User rejects the process&quot;"/>
+      </conditions>
+      <properties xsi:type="smaC:PropertyUser" type="User" storageData="storage" name="user" inicialization="registerUsersMarriage[msg.sender]"/>
+    </clauses>
+    <clauses name="acceptProcessWitnessUsers" personalizedModifier="//@contracts.0/@modifiers.2" predefinedModifier="payable">
+      <inputParams type="bool" valueInput="opinion"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender.balance" operator=">=" expr2="tax/4" message="&quot;Account can't paid the marriage tax&quot;"/>
+      <conditions condition="user.accept == false &amp;&amp; opinion == true" event="//@contracts.0/@events.1">
+        <expressions>user.accept = true;</expressions>
+        <expressions>payable(user.idAddress).transfer</expressions>
+        <expressions>(tax/4);</expressions>
+        <inputParamsEvent valueInput="&quot;Witness accepts the process&quot;"/>
+      </conditions>
+      <properties xsi:type="smaC:PropertyUser" type="User" storageData="storage" name="user" inicialization="registerWitnessUsersMarriage[msg.sender]"/>
+    </clauses>
+    <clauses name="changeOpinionProcessWitnessUser" personalizedModifier="//@contracts.0/@modifiers.2" predefinedModifier="payable">
+      <inputParams type="bool" valueInput="opinion"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender" operator="!=" expr2="address(0)" message="&quot;Account no valid&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="msg.sender.balance" operator=">=" expr2="tax" message="&quot;Account can't paid the marriage tax&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="user.accept" operator="!=" expr2="opinion" message="&quot;Witness doesn't change the original opinion&quot;"/>
+      <conditions condition="user.accept == false &amp;&amp; opinion == true" event="//@contracts.0/@events.1">
+        <expressions>user.accept = true;</expressions>
+        <expressions>payable(user.idAddress).transfer</expressions>
+        <expressions>(tax/4);</expressions>
+        <inputParamsEvent valueInput="&quot;Witness accepts the process&quot;"/>
+      </conditions>
+      <conditions condition="user.accept == true &amp;&amp; opinion == false" event="//@contracts.0/@events.2">
+        <expressions>user.accept = false;</expressions>
+        <expressions>payable(user.idAddress).transfer</expressions>
+        <expressions>(tax/4);</expressions>
+        <inputParamsEvent valueInput="&quot;Witness rejects the process&quot;"/>
+      </conditions>
+      <properties xsi:type="smaC:PropertyUser" type="User" storageData="storage" name="user" inicialization="registerWitnessUsersMarriage[msg.sender]"/>
+    </clauses>
+    <clauses name="confirmGubernamentalMarriageProccess" personalizedModifier="//@contracts.0/@modifiers.0" predefinedModifier="payable" event="//@contracts.0/@events.3">
+      <restriction xsi:type="smaC:Restriction" expr1="registerUsersMarriage[address1MarriageUser].accept" operator="==" expr2="true" message="&quot;The spouse has not accepted the marriage agreement&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="registerUsersMarriage[address2MarriageUser].accept" operator="==" expr2="true" message="&quot;The spouse has not accepted the marriage agreement&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="registerWitnessUsersMarriage[address1WitnessUser].accept" operator="==" expr2="true" message="&quot;The witness has not accepted the marriage agreement&quot;"/>
+      <restriction xsi:type="smaC:Restriction" expr1="registerWitnessUsersMarriage[address2WitnessUser].accept" operator="==" expr2="true" message="&quot;The witness has not accepted the marriage agreement&quot;"/>
+      <properties xsi:type="smaC:PropertyUInteger" type="uint" name="amount" inicialization="address(this).balance"/>
+      <properties xsi:type="smaC:PropertyUInteger" type="uint" name="witnessTax" inicialization="tax/4 * 2"/>
+      <expressions>payable(msg.sender).transfer</expressions>
+      <expressions>(amount - witnessTax);</expressions>
+      <expressions>cleanUsersMarriageProccess();</expressions>
+      <inputParamsEvent valueInput="&quot;The marriage agreement has been accepted by all parties&quot;"/>
+    </clauses>
+    <clauses name="cleanUsersMarriageProccess" personalizedModifier="//@contracts.0/@modifiers.0" predefinedModifier="payable">
+      <properties xsi:type="smaC:PropertyUInteger" type="uint" name="amount" inicialization="address(this).balance"/>
+      <properties xsi:type="smaC:PropertyUInteger" type="uint" name="witnessTax" inicialization="tax/4"/>
+      <properties xsi:type="smaC:PropertyUser" type="User" name="witnessUser1" inicialization="registerWitnessUsersMarriage[address1WitnessUser]"/>
+      <properties xsi:type="smaC:PropertyUser" type="User" name="witnessUser2" inicialization="registerWitnessUsersMarriage[address2WitnessUser]"/>
+      <expressions>delete registerUsersMarriage[address1MarriageUser];</expressions>
+      <expressions>delete registerUsersMarriage[address2MarriageUser];</expressions>
+      <expressions>payable(witnessUser1.idAddress).transfer</expressions>
+      <expressions>(witnessTax);</expressions>
+      <expressions>payable(witnessUser2.idAddress).transfer</expressions>
+      <expressions>(witnessTax);</expressions>
+      <expressions>delete registerWitnessUsersMarriage[address1WitnessUser];</expressions>
+      <expressions>delete registerWitnessUsersMarriage[address2WitnessUser];</expressions>
+      <expressions>counterRegisterUsersMarriage = 0;</expressions>
+      <expressions>counterWitnessUsersMarriage = 0;</expressions>
+      <expressions>address1MarriageUser = address(0);</expressions>
+      <expressions>address2MarriageUser = address(0);</expressions>
+      <expressions>address1WitnessUser = address(0);</expressions>
+      <expressions>address2WitnessUser = address(0);</expressions>
+    </clauses>
+  </contracts>
+</smaC:File>
