@@ -47,7 +47,6 @@ _______________
 
   4.Choose the Anonymized DSL plugin and click Next.
 
-![Install New Software]()
 
   5.Check the plugins that Eclipse will proceed to install.
 
